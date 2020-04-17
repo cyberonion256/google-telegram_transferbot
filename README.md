@@ -1,19 +1,20 @@
 # Google-Telegram transfer bot
 This Google Apps Script links a Telegram bot to a google spreadsheet and allows command-based information storaging
 
-**Features:**
-- Feed a Telegram bot with information to store in Google Spreadsheet
-- Currently set to store URLs and enter keywords, locations, persons, comments - but: Fully customizable to store any information
-- Indicate type of stored information with Telegram commands (starting with '/'), e.g. keywords, persons, locations
-- Stores URLs as HTML in Google Drive folder
-- Prevents input confusion between two users by blocking the input as long as another user is still requesting the bot
-- Easy to install, free of charge, 24/7 readiness
+## Features:
+- **Link Telegram to Google Spreadsheet:** Feed a Telegram bot with information to store in Google Spreadsheet
+- **Fill in customizable columns:** Currently set to digest a URL and enter keywords, locations, persons, comments linked to the URL - but: Fully customizable to store any information
+- **Telegram command based**: Indicate type of stored information with Telegram commands (starting with '/'), e.g. keywords, persons, locations
+- **Back up for URLs**: Stores URLs as HTML in Google Drive folder
+- **Single Input**: Prevents input confusion between two users by blocking the input as long as another user is still requesting the bot
+- **Simple syntax**: THe core element of the bot relies only on if-else statements and is understandable also to programming beginners
+- **Easy to install, free of charge, 24/7 readiness**
 
 ## 1. Initizalization
 
 >> Set up follows this YouTube tutorial: https://www.youtube.com/watch?v=mKSXd_od4Lg 
 
-- Set up a telegram bot with @BotFather (relevant information: bot token)
+- Set up a telegram bot with @BotFather (relevant information: bot token), see here: https://core.telegram.org/bots
 - Set up new Google Spreadsheet (relevant information: webApp url, Spreadsheet id)
 - Set up Google Drive folder to store URLs (relevant information: folder id)
 
@@ -28,13 +29,14 @@ The bot is prepared to fill a prepared spread sheet. The provided template consi
 
 ## Import and fill individual details to Google Apps Script code
 
-The bot runs on a Google Web App, using Google Apps script - a JavaScript based programming. To get the bot running, you can import all .gs files into one script but I recommand you to keep it separated.
+The bot runs on a Google Web App, using Google Apps script - a JavaScript based programming. To get the bot running, you can download the .js (JavaScript) files, rename them to .gs (Google Apps Script) and import them to your Google Script Apps project.
 
 To connect the script to your bot and Google spreadsheet, you have to subsitute the following variable:
 - **Telegram bot token**: you will receive the token from the Telegram botfather (looks like this: 1175871460:AAGDapaqpOGdYgsMqDL0lP213IKlMiqXGog)
 - **Google webAppUrl**: you will receive the webAppUrl when you publish your script for the first time as WebApp (looks like this: https://script.google.com/macros/s/AKfydbw7KIMKGdLNpmPtdXJoQF7Row61ItJq8Dztvjh9CNNXZ1EmJio/exec)
 - **Google Spreadsheet id**: you fill find the ss_id in the URL of your spreadsheet (looks like this: "1Bsn7gZX5jZ_lTVucM5ebaDzmxtok3UtMNVUb8021h3e")
 - **Telegram admin id**: if you want to receive status updates for your bot, please fill in your Telegram id (or the one of the admin). You'll find the id if you send your bot a message and look it up in the as sender_id... ;-) (looks like this: 325208322)
+- Telegram commands: Telegram commands start with a forward slash ('/') and are fully customizable. In the inital setting, we have specified the following 10 commands that the bot reacts to: /start_input, /url_add, /key_add, /place_add, /person_ad, /comment_add, /help, /cancel, /end_input, /start.
 
 The script uses the following functions:
 - getMe(): checking bot status
@@ -45,3 +47,16 @@ The script uses the following functions:
 - StoreHtmlToDrive(html_input, file_title): stores HTML to Google Drive folder, set with folder_id
 - isolateURL(string): isolates urls starting with HTTP and HTTPS from strings
 - three send functions for replies of the telegram bot to its users
+
+## Prepare Telegram bot
+
+As a last step, add the commands to your telegram bots via the BotFather 
+>> https://core.telegram.org/bots#commands
+
+Watch out: The bot does not work with inline commands
+
+## Start off = customize to your own needs
+
+Take a closer look at the doPost() function, as it stores the "heart" of the transfer bot. With little programming skills, you can start adapting the transfer bot to your own needs. Make sure to always select the appropriate cells in the Spreadsheet as it works as your temporary (Worksheet 2 + 3) and permanent storage. 
+
+Have fun!
