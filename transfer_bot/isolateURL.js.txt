@@ -1,0 +1,31 @@
+/// URL ISOLATION
+// function to isolate URLs starting with www or http in text
+
+function isolateURL(string) {
+  // this function isolates urls starting with HTTP and HTTPS from strings
+  var www = "www";
+  var http = "http";
+  var str_split = string.toLowerCase().split(/ |\n/);
+  
+  for (i = 0; i < str_split.length; i++) {
+    if (str_split[i].indexOf(http) !== -1 || str_split[i].indexOf(www) !== -1) {
+      var response = str_split[i];
+    }
+  }
+  return response;
+}
+
+
+/*
+function test(){
+  var string = "Hello World\nwww.google.com";
+  var response = isolateHTTP(string);
+  if (response !== null){
+    var res = "if";
+  } else {
+    var res = "else";
+  }
+  Logger.log(response);
+  Logger.log(res);
+}
+*/

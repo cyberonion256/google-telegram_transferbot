@@ -1,0 +1,239 @@
+//// MAIN 
+// transfer bot that stores input of telegram user in customizable Google Spreadsheet, controlled by telegram commands
+
+// Telegram inputs (bot token, telegramURLapi)
+var token = " ** YOUR TOKEN **"; 
+var telegramUrl = "https://api.telegram.org/bot" + token;
+
+// Google inputs (webApps, Spreadsheet id)
+var webAppUrl = "** YOUR WEBAPPURL **";
+var ss_id = "** YOUR SPREADSHEET ID **";
+
+// Telegram id of the admin that hosts the bot
+var admin_id = "** YOUR ADMIN TELEGRAM ID **";
+
+// help text (passed back if help command is sent)
+var help_text = "Hello user! This transfer_bot allows you to store URLs with keywords, persons, and locations attached in a Google Spreadsheet. Please send commands (starting with '/') to navigate the bot. Always wait for a response of the bot before entering another text. Enjoy easy transfer! Version 0.1"
+
+// comand list
+var command1 = "/start_input";
+var command2 = "/url_add";
+var command3 = "/key_add";
+var command4 = "/place_add";
+var command5 = "/person_add";
+var command6 = "/comment_add";
+var command7 = "/help";
+var command8 = "/cancel";
+var command9 = "/end_input";
+var command10 = "/start";
+
+// Checking bot status
+function getMe() {
+  var url = telegramUrl + "/getMe";
+  var response = UrlFetchApp.fetch(url);
+  Logger.log(response.getContentText());
+}
+
+// setting telegram webhook (to connect Google WebApp to bot)
+function setWebhook() {
+  var url = telegramUrl + "/setWebhook?url=" + webAppUrl;
+  var response = UrlFetchApp.fetch(url);
+  Logger.log(response.getContentText());
+}
+
+// deleting telegram webhook
+function deleteWebhook() {
+  var url = telegramUrl + "/deleteWebhook?url=" + webAppUrl;
+  var response = UrlFetchApp.fetch(url);
+  Logger.log(response.getContentText());
+}
+
+// interaction with bot (digest messages to bot and post reponses)
+function doPost(i) {
+  var data = JSON.parse(i.postData.contents); // parses the JSON input that has been sent to the bot
+  var text = data.message.text; // the actual message sent to the bot (as string)
+  var msg_id = data.message.message_id;
+  var sender_id = data.message.from.id;
+  var chat_id = data.message.chat.id;
+  var name = data.message.from.first_name + " " + data.message.from.last_name;
+  var date = data.message.date;
+  var sheet = SpreadsheetApp.openById(ss_id); // spreadsheet to store data 
+  var sheet0 = sheet.getSheets()[0];
+  var sheet1 = sheet.getSheets()[1];
+  var sheet2 = sheet.getSheets()[2];
+  var input_key = sheet2.getRange('B2').getValue(); // user_id of person that sent commands to start an input
+  
+  if (input_key == sender_id || input_key == ""){ // checks if there is a non-finished input by another user
+      
+    if (text.split("")[0] == "/"){ // checks if input is a command (starts with '/')
+      var command = text.split(" ")[0];
+      sheet2.getRange('A2').setValue(command); // sets command in command storage and overwrites existing command
+      sheet2.getRange("B2").setValue(sender_id); // sets sender_id in command storage and overwrites existing sender_id 
+      
+      if (command == command1) {
+        sendText(sender_id, "You started an input. Please name a command before sending information and always wait for a response of the bot. If you're done, send '/end_input'. Thanks!")
+        sheet1.getRange('A2').setValue(new Date());
+        sheet1.getRange('B2').setValue(chat_id);
+        sheet1.getRange('C2').setValue(date);
+        sheet1.getRange('I2').setValue(sender_id);
+        sheet1.getRange('J2').setValue(name);
+      }
+      if (command == command2) {
+        sendText(sender_id, "Please, add one url now. For more than one URL, please finish this input first and start a new one.");
+      }
+      if (command == command3) {
+        sendText(sender_id, "Please, add keywords now. More keywords must be separated with commas. Keywords can also be added in multiple messages.");
+      }
+      if (command == command4) {
+        sendText(sender_id, "Please, add a location, city or country now. More entries must be separated with commas. Locations can also be added in multiple messages.");
+      }
+      if (command == command5) {
+        sendText(sender_id, "Please, add persons linked in the url (e.g. 'Max Mustermann'). More entries must be separated with commas. Persons can also be added in multiple messages.");
+      }
+      if (command == command6) {
+        sendText(sender_id, "Please, add a comment now. Only one comment can be added.");
+      }
+      if (command == command7) {
+        sendText(sender_id, help_text);
+      }    
+      if (command == command9) {
+        var values = sheet1.getRange("D2:H2").getDisplayValues();
+        sendHTMLtext(sender_id, "You have entered the following information: \n\n" + values + "\n\n Would you like to store this information? Confirm with 'yes', cancel with 'no'.");
+      }
+      if (command == command8) {
+        sendHTMLtext(sender_id, "Do you want to cancel the current input? Please, confirm with 'yes', proceed with 'no'.");
+      }
+      
+      if (command == command10) {
+        sendText(sender_id, "Welcome! Please, start your first input with the '/start_input' command.")
+      }
+      
+    } else {
+      var command = sheet2.getRange('A2').getDisplayValue();
+      var command_cell = sheet2.getRange('A2');
+    
+      if (command_cell.isBlank()) {
+        var URL_only = isolateURL(text);
+        if (URL_only !== undefined) {
+          sendText_nopreview(sender_id, "You started an input without a command. I am not pleased! Nevertheless, I detected a URL (" + URL_only + "), opened a new input and already added the URL . If this was wrong, correct the URL with a new URL input after you entered the '/url_add' command, or cancel the input entirely with '/cancel'. If you're done, send '/end_input'. And don't forget: Always use commands!");
+          sheet1.getRange('D2').setValue(URL_only);
+          sheet1.getRange('A2').setValue(new Date());
+          sheet1.getRange('B2').setValue(chat_id);
+          sheet1.getRange('C2').setValue(date);
+          sheet1.getRange('I2').setValue(sender_id);
+          sheet1.getRange('J2').setValue(name);
+        } else{
+          sendText(sender_id, "You entered something without a command. Your entry could not be saved. Please, start an input with '/start_input'. Thanks!")
+        }
+      }
+      
+      if (command == command1 || command == command7 || command == command10) {
+        sendText(sender_id, "The entry (" + text + ") was not processed. Please, use commands (starting with '/') to indicate what you're about to enter.");
+      }
+      
+      if (command == command2) {
+        var URL_only = isolateURL(text);
+
+        if (URL_only !== undefined){
+          sheet1.getRange('D2').setValue(URL_only);
+          sendText_nopreview(sender_id, "The URL (" + URL_only + ") was added. Now, please, fill in keywords, locations or persons. Make sure to indicate your input with a command from the list first.");
+        } else {
+          sendText(sender_id, "I did not recognise an URL in the post. Please make sure to include 'http', 'https', or 'www'.")
+        }
+      }
+      
+      if (command == command3) {
+        var cell = sheet1.getRange('E2');
+        if (cell.isBlank()) {
+          cell.setValue(text);
+          sendText(sender_id, "Keyword was added. Please, add further keywords or enter new command.");
+        } else {
+          var content = cell.getDisplayValue() + ", " + text;
+          cell.setValue(content);
+          sendText(sender_id, "Keyword was added. Please, add further keywords or enter new command.");
+        }
+      }  
+      if (command == command5) {
+        var cell = sheet1.getRange('F2');
+        if (cell.isBlank()) {
+          cell.setValue(text);
+          sendText(sender_id, "Person was added. Please, add further persons or enter new command.");
+        } else {
+          var content = cell.getDisplayValue() + ", " + text;
+          cell.setValue(content);
+          sendText(sender_id, "Person was added. Please, add further persons or enter new command.");
+        }
+      }
+      
+      if (command == command6) {
+        sheet1.getRange('H2').setValue(text);
+        sendText(sender_id, "A comment was added. Multiple comments are not possible.")
+      }
+      
+      if (command == command4) {
+        var cell = sheet1.getRange('G2');
+        if (cell.isBlank()) {
+          cell.setValue(text);
+          sendText(sender_id, "Location was added. Please, add further locations or enter new command.");
+        } else {
+          var content = cell.getDisplayValue() + ", " + text;
+          cell.setValue(content);
+          sendText(sender_id, "Location was added. Please, add further locations or enter new command.");
+        }
+      }
+      
+      if (command == command9) {
+        var cell_content = sheet1.getRange("A2:J2").getValues();
+        var newRow = sheet0.getLastRow() + 1;
+        var rangeToPaste = sheet0.getRange(newRow, 1, 1, 10);
+        var url = sheet1.getRange("D2").getValue();
+        var url_date = sheet1.getRange("C2").getValue();
+        
+        if (text.toLowerCase() == "yes") {
+          sendText(sender_id, "Your information was saved. To add further information, send '/start_input'. Thanks for working with me!");
+          
+          try {
+            var file_title = url_date + "_URLcapture_by" + sender_id;
+            StoreHtmlToDrive(getHTMLfromURL(url), file_title);
+            sendText(sender_id, "Furthermore: URL saved as HTML to Google Drive.");
+          } catch(err) {
+            var response = Logger.log(err);
+            sendText(sender_id, "Notice: Failed to catch url as HTML. (Error: " + response + ")");
+          }
+          rangeToPaste.setValues(cell_content);
+          sheet1.deleteRow(2);
+          sheet2.deleteRow(2);
+          sendText(admin_id, "New entry sucessfully stored. (Author: " + name + ", Date:" + new Date() + ", Sender ID: " + sender_id+")")
+        } else {
+          sendText(sender_id, "The information was NOT saved. Please, add further information and end the process.");
+        }
+        
+      }
+      
+      if (command == command8) {
+        if (text.toLowerCase() == "yes") {
+          sendText(sender_id, "Your input was canceled and the current input deleted.");
+          sheet1.deleteRow(2);
+          sheet2.deleteRow(2);
+        } else {
+          sendText(sender_id, "Cancellation aborted. You can proceed with your input. Please, remember to use commands.");
+        }
+      }
+    } // else 2n level  
+      
+  } else {
+    
+    sendText(sender_id, "Another user is currently using the transferbot. You cannot enter information. We will ask the other user to finish the input. Please, try again later.");
+    sendText(input_key, "Another user wants to use the transferbot. Please, finish your input as soon as possible (with /end_input) or cancel (with /cancel). Thank you!");
+    
+  } // else 1st level
+
+} // function
+
+
+/*
+function test(){
+  var content = sheet2.getRange("A7").getValue();
+  Logger.log(content);
+}
+*/

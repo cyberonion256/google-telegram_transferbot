@@ -1,0 +1,19 @@
+/// URL CAPTURE AND STORE
+// functions to grab HTML and store it to a Google Drive folder
+
+
+// Google Drive folder id
+var folder_id = "** YOUR FOLDER ID **";
+
+// grab HTML from given URL, returns html
+function getHTMLfromURL(url) {
+  var html = UrlFetchApp.fetch(url);
+  var response = Logger.log(html.getContentText());
+  return html;
+}
+
+// stores HTML to Google Drive folder
+function StoreHtmlToDrive(html_input, file_title){
+  var folder = DriveApp.getFolderById(folder_id);
+  folder.createFile(file_title, html_input, MimeType.HTML);
+}

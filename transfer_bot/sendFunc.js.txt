@@ -1,0 +1,25 @@
+/// SEND FUNCTIONS
+// different send functions for replies of the telegram bot to its users
+
+
+// regular text
+function sendText(id, text) {
+  var url = telegramUrl + "/sendMessage?chat_id=" + id + "&text=" + text;
+  var response = UrlFetchApp.fetch(url);
+  Logger.log(response.getContentText());
+}
+
+// html text
+function sendHTMLtext(id, text) {
+  var input = encodeURIComponent(text)
+  var url = telegramUrl + "/sendMessage?chat_id=" + id + "&text=" + input + "&parse_mode=html";
+  var response = UrlFetchApp.fetch(url );
+  Logger.log(response.getContentText());
+}
+
+// text without link preview (for URL)
+function sendText_nopreview(id, text) {
+  var url = telegramUrl + "/sendMessage?chat_id=" + id + "&text=" + text +"&disable_web_page_preview=true";
+  var response = UrlFetchApp.fetch(url);
+  Logger.log(response.getContentText());
+}
