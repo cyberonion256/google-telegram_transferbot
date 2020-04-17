@@ -7,7 +7,7 @@ This Google Apps Script links a Telegram bot to a google spreadsheet and allows 
 - **Telegram command based**: Indicate type of stored information with Telegram commands (starting with '/'), e.g. keywords, persons, locations
 - **Back up for URLs**: Stores URLs as HTML in Google Drive folder
 - **Single Input**: Prevents input confusion between two users by blocking the input as long as another user is still requesting the bot
-- **Simple syntax**: THe core element of the bot relies only on if-else statements and is understandable also to programming beginners
+- **Simple syntax**: The core element of the bot relies only on if-else statements and is understandable also to programming beginners
 - **Easy to install, free of charge, 24/7 readiness**
 
 ## 1. Initizalization
