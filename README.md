@@ -12,15 +12,15 @@ This Google Apps Script links a Telegram bot to a google spreadsheet and allows 
 
 ## 1. Initizalization
 
->> Set up follows this YouTube tutorial: https://www.youtube.com/watch?v=mKSXd_od4Lg 
-
 - Set up a telegram bot with @BotFather (relevant information: bot token), see here: https://core.telegram.org/bots
 - Set up new Google Spreadsheet (relevant information: webApp url, Spreadsheet id)
 - Set up Google Drive folder to store URLs (relevant information: folder id)
 
+>> Set up follows this YouTube tutorial: https://www.youtube.com/watch?v=mKSXd_od4Lg 
+
 ## 2. Prepare Google Spread Sheet
 
-The bot is prepared to fill a prepared spread sheet. The provided template consistes of three worksheets:
+The bot in its current specification is written to fill the attached spread sheet [Template](docs/Spreadsheet_template_transferbot.xls). The provided template consistes of three worksheets:
 - *Worksheet 1 "collection":* This is where the finished input is stored; the columns must match those of Worksheet 2 "assembler".
 - *Worksheet 2 "assembler":* This is where the bot assembles a current input before it is pushed to the collection or deleted; the columns must match those of Worksheet 1 "collection".
 - *Worksheet 3 "command_storage":* This is a temporary storage for command into to correctly refer following input to the correct collumns, e.g. if the command is '/person_add', the next entries are added in the person column in the "assembler" sheet.
@@ -50,10 +50,21 @@ The script uses the following functions:
 
 ## Prepare Telegram bot
 
-As a last step, add the commands to your telegram bots via the BotFather 
->> https://core.telegram.org/bots#commands
+As a last step, add the commands to your telegram bots via the BotFather (https://core.telegram.org/bots#commands). To use the preset functions of the transfer bot, add the following commands to 
 
-Watch out: The bot does not work with inline commands
+```
+start_input - Start sending information 
+url_add - Add URL (only one)
+key_add - Add Keyword (multiple)
+place_add - Add Place, City, or Country (multiple)
+person_add - Add Person (multiple)
+comment_add - Add comment (only one)
+help - Get some help
+cancel - Cancel process and delete input
+end_input - End Input
+```
+
+Watch out: The bot does not work with inline commands!
 
 ## Start off = customize to your own needs
 
